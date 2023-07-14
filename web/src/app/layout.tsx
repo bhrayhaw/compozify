@@ -4,7 +4,8 @@ import LocalFont from 'next/font/local'
 import Image from 'next/image'
 import { cn } from '~/utils/classNames'
 import { siteConfig } from '~/config/site'
-import ThemeProvider from '~/context/useTheme'
+import { StoreProvider } from '~/context/useStore'
+import Navbar from '~/components/Navbar'
 
 export const metadata: Metadata = {
   title: {
@@ -53,16 +54,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html
       className={cn(
-        'bg-white text-neutral-900 dark:bg-neutral-900 dark:text-white',
+        'bg-white text-zinc-900 dark:bg-zinc-800 dark:text-white',
         Satoshi.variable,
         Lobster.variable,
         JetbrainsMono.variable
       )}
     >
       <head />
-      <body className="bg-white text-neutral-900 dark:bg-neutral-900 dark:text-white">
-        <ThemeProvider>
-          <main className="bg-white text-neutral-900 dark:bg-neutral-900 dark:text-white">
+      <body className="bg-white text-zinc-900 dark:bg-zinc-800 dark:text-white">
+        <StoreProvider>
+          <main className="bg-white text-zinc-900 dark:bg-zinc-800 dark:text-white">
             <div className={cn('relative')}>
               <div className="fixed inset-0">
                 <Image
@@ -70,13 +71,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   alt="Background parttern"
                   loading="eager"
                   fill
-                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    transform: 'rotate(45deg)'
+                  }}
                 />
               </div>
-              <div className="relative inset-0 z-[1] min-h-screen w-full">{children}</div>
+              <Navbar className={cn('fixed z-[4] top-0 inset-x-0')} />
+              <div className="relative inset-0 z-[3] min-h-screen w-full">{children}</div>
             </div>
           </main>
-        </ThemeProvider>
+        </StoreProvider>
       </body>
     </html>
   )
