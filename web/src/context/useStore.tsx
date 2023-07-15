@@ -32,30 +32,44 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           'Content-Type': 'application/json'
         }
       })
-
-      // throw error if response is not ok to trigger catch block
+  
+      // Throw an error if the response is not OK to trigger the catch block
       if (!response.ok) throw new Error('Failed to generate response')
-
-      // get response body and handle it here
-      const responseBody = response.json()
-
+  
+      // Get the response body and handle it here
+      const responseBody = await response.json()
+  
       setCode(responseBody)
     } catch (error) {
-      // use switch statement to handle different error types
-      switch(error) {
-        case 400:
-          setCode("Bad request")
-        case 401:
-          setCode("Unauthorized")
-        case 404:
-          setCode("Not found")
-        case 500:
-          setCode("Internal Server Error")
+      // Use switch statement to handle different error types
+      switch (error.message) {
+        case 'Failed to generate response':
+          setCode('Failed to generate response')
+          break
         default:
-          setCode("Unknown error")
+          // Handle specific HTTP status codes using the response status property
+          switch (response?.status) {
+            case 400:
+              setCode('Bad request')
+              break
+            case 401:
+              setCode('Unauthorized')
+              break
+            case 404:
+              setCode('Not found')
+              break
+            case 500:
+              setCode('Internal Server Error')
+              break
+            default:
+              setCode('Unknown error')
+              break
+          }
+          break
       }
     }
   }, [])
+  
 
   const memoizedValue = useMemo(
     () => ({
