@@ -7,7 +7,6 @@ module.exports = {
     optimizeUniversalDefaults: true
   },
   content: ['./src/**/*.{js,jsx,ts,tsx,vue,mdx,md}'],
-  darkMode: 'class', // or 'media' or 'class
   theme: {
     screens: {
       xxs: '320px',
