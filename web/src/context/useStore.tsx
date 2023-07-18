@@ -1,70 +1,83 @@
 'use client'
 
-import { createContext, useState, useContext, useMemo, ReactNode, useCallback } from 'react'
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { ThemeProvider as Theme } from 'next-themes'
+import { stringify } from 'yaml'
 import useMounted from '~/hooks/useMounted'
+import { ErrorCause } from '~/types/nav'
 
 interface Store {
   titleInView: boolean
   setTitleInView: (value: boolean) => void
-  compose: () => void
+  compose: (command: string) => Promise<void>
   code?: string
+  menu: boolean
+  setMenu: (value: boolean) => void
+  error?: Err
+}
+
+type Err = {
+  message: string
+  code: number
 }
 
 const StoreContext = createContext<Store>({
   titleInView: false,
   setTitleInView: () => {},
-  compose: () => {},
-  code: undefined
+  compose: async () => {},
+  code: undefined,
+  menu: false,
+  setMenu: () => {}
 })
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const mounted = useMounted()
   const [titleInView, setTitleInView] = useState(false)
   const [code, setCode] = useState<undefined | string>(undefined)
+  const [menu, setMenu] = useState(false)
+  const [error, setError] = useState<undefined | Err>(undefined)
 
-  const compose = useCallback(async () => {
+  useEffect(() => {
+    const e = setTimeout(() => setError(undefined), 5000)
+
+    return () => clearTimeout(e)
+  }, [error])
+
+  const compose = useCallback(async (command: string) => {
     try {
-      const response = await fetch('/api/compose', {
+      const response = await fetch('/api/parse', {
         mode: 'cors',
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: command })
       })
   
       // Throw an error if the response is not OK to trigger the catch block
       if (!response.ok) throw new Error('Failed to generate response')
-  
-      // Get the response body and handle it here
-      const responseBody = await response.json()
-  
-      setCode(responseBody)
+
+      // get response body and handle it here
+      const body = await response.json()
+      setCode(body && body.output ? stringify(body.output) : undefined)
     } catch (error) {
-      // Use switch statement to handle different error types
-      switch (error.message) {
-        case 'Failed to generate response':
-          setCode('Failed to generate response')
+      let err: ErrorCause
+      if (error instanceof Error) err = error as ErrorCause
+      else err = new Error('Error creating catalog', { cause: { error } }) as ErrorCause
+      // use switch statement to handle different error types
+      switch (err.cause?.res?.status) {
+        case 400: // bad request - invalid data
+          setError({ message: 'Bad request', code: 400 })
           break
+
+        case 404: // not found - resource not found
+          setError({ message: 'Not found', code: 404 })
+          break
+
+        case 500: // internal server error - unknown error
+          setError({ message: 'Internal server error', code: 500 })
+          break
+
         default:
-          // Handle specific HTTP status codes using the response status property
-          switch (response?.status) {
-            case 400:
-              setCode('Bad request')
-              break
-            case 401:
-              setCode('Unauthorized')
-              break
-            case 404:
-              setCode('Not found')
-              break
-            case 500:
-              setCode('Internal Server Error')
-              break
-            default:
-              setCode('Unknown error')
-              break
-          }
+          setError({ message: 'Unknown error', code: 0 })
           break
       }
     }
@@ -76,9 +89,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       titleInView,
       setTitleInView,
       compose,
-      code
+      code,
+      menu,
+      setMenu
     }),
-    [code, compose, titleInView]
+    [code, compose, titleInView, menu]
   )
 
   if (!mounted) return null

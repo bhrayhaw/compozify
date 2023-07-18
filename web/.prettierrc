@@ -1,8 +1,12 @@
 {
   "endOfLine": "auto",
   "trailingComma": "none",
+<<<<<<< HEAD
   "printWidth": 100,
   "tabWidth": 2,
+=======
+  "printWidth": 120,
+>>>>>>> web
   "semi": false,
   "singleQuote": true,
   "bracketSameLine": false,

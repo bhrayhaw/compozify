@@ -1,10 +1,16 @@
 import '~/styles/globals.css'
+
 import { Metadata } from 'next'
 import LocalFont from 'next/font/local'
 import Image from 'next/image'
-import { cn } from '~/utils/classNames'
+import Navbar from '~/components/Navbar'
 import { siteConfig } from '~/config/site'
+<<<<<<< HEAD
 import ThemeProvider from '~/context/useTheme'
+=======
+import { StoreProvider } from '~/context/useStore'
+import { cn } from '~/utils/classNames'
+>>>>>>> web
 
 export const metadata: Metadata = {
   title: {
@@ -73,7 +79,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
                 />
               </div>
+<<<<<<< HEAD
               <div className="relative inset-0 z-[1] min-h-screen w-full">{children}</div>
+=======
+              <Navbar className={cn('sticky inset-x-0 top-0 z-[4] bg-white/90 dark:bg-neutral-800/90')} />
+              <div className="relative inset-0 z-[3] min-h-screen w-full">{children}</div>
+>>>>>>> web
             </div>
           </main>
         </ThemeProvider>
